@@ -74,7 +74,7 @@ function renderMain() {
 
   app.innerHTML = `
     <div class="card tournament" id="tournament">
-      <img src="images/ufc324.jpg" class="poster" alt="UFC 324 Poster" />
+      <img src="images/ufc324_official.jpg" class="poster" />
       <span>Nearest tournament</span>
       <h3>UFC 324</h3>
       <p>Gaethje vs Pimblett</p>
