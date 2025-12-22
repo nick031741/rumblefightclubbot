@@ -51,7 +51,7 @@ function renderMain() {
 
   app.innerHTML = `
     <div class="card">
-      <img src="images/ufc324.jpg" class="poster" />
+      src="/rumblefightclubbot/images/ufc324_official.jpg" class="poster"
       <h3>UFC 324</h3>
       <p>Gaethje vs Pimblett</p>
       <button id="enterPrediction">ENTER PREDICTION</button>
