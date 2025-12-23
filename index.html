@@ -2,27 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>RUMBLE FIGHT CLUB</title>
+  <title>Rumble Fight Club</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    /* RESET */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    /* GLOBAL */
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #0f0f0f;
       color: #fff;
       min-height: 100vh;
       overflow-x: hidden;
-      text-transform: uppercase;
     }
 
     /* HEADER */
@@ -32,33 +29,33 @@
       left: 16px;
       font-weight: 800;
       font-size: 14px;
-      letter-spacing: 1.2px;
+      letter-spacing: 1px;
       line-height: 1.2;
     }
 
-    /* TOP RIGHT MENU */
+    /* HEADER RIGHT */
     .nickname {
       position: absolute;
       top: 16px;
       right: 16px;
       display: flex;
-      align-items: center;
       gap: 14px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      white-space: nowrap;
+      font-size: 12px;
+      align-items: center;
     }
 
-    .nickname span {
+    .header-link {
       opacity: 0.6;
+      cursor: default;
     }
 
     #myPicksBtn {
-      opacity: 1;
+      text-transform: uppercase;
+      font-weight: 700;
       padding: 6px 10px;
       border-radius: 8px;
       background: #222;
+      opacity: 1;
       cursor: pointer;
     }
 
@@ -90,13 +87,22 @@
 
     .card h3 {
       margin-bottom: 6px;
-      letter-spacing: 1.2px;
+    }
+
+    .card h3.main-fight {
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .card p {
       opacity: 0.8;
       margin-bottom: 16px;
-      letter-spacing: 0.8px;
+    }
+
+    .event-date {
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 1px;
     }
 
     /* BUTTONS */
@@ -107,22 +113,19 @@
       border: none;
       background: #2a2a2a;
       color: #fff;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
-      letter-spacing: 1.2px;
       cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
 
     button:active {
       transform: scale(0.97);
     }
 
-    /* BOTTOM SHEET */
+    /* ───────────────
+       BOTTOM SHEET
+    ─────────────── */
+
     .bottom-sheet {
       position: fixed;
       left: 0;
@@ -143,11 +146,10 @@
       bottom: 0;
     }
 
-    /* FIGHT */
     .fight {
       padding: 12px 0;
       border-bottom: 1px solid #222;
-      font-size: 13px;
+      font-size: 14px;
     }
 
     .fight:last-child {
@@ -155,12 +157,12 @@
     }
 
     .fight-title {
-      font-weight: 700;
+      font-weight: 600;
       margin-bottom: 4px;
     }
 
     .weight {
-      font-size: 11px;
+      font-size: 12px;
       opacity: 0.6;
       margin-bottom: 8px;
     }
@@ -179,30 +181,20 @@
       background: #1f1f1f;
       border: 1px solid #2a2a2a;
       text-align: center;
-      font-size: 12px;
+      font-size: 13px;
       cursor: pointer;
       user-select: none;
-      opacity: 0.6;
     }
 
     .pick.active,
     .method.active {
       background: #3a3a3a;
       border-color: #555;
-      opacity: 1;
     }
 
     #savePredictions {
       margin-top: 16px;
       background: #2f2f2f;
-    }
-
-    /* MOBILE SAFETY */
-    @media (max-width: 360px) {
-      .nickname {
-        gap: 8px;
-        font-size: 10px;
-      }
     }
   </style>
 </head>
@@ -215,8 +207,8 @@
 </header>
 
 <div class="nickname" id="nickname">
-  <span>LEADERBOARD</span>
-  <span>QUIZ</span>
+  <span class="header-link">LEADERBOARD</span>
+  <span class="header-link">QUIZ</span>
   <span id="myPicksBtn">MY PICKS</span>
 </div>
 
