@@ -53,7 +53,6 @@ function showNicknameForm() {
       <input id="nickInput" placeholder="nickname"
         style="width:100%;padding:12px;border-radius:10px;border:none;margin:12px 0;background:#2a2a2a;color:#fff;" />
       <button onclick="saveNickname()">Continue</button>
-      <div id="error" style="color:#ff6b6b;font-size:13px;margin-top:8px"></div>
     </div>
   `;
 }
@@ -96,19 +95,22 @@ function renderMain() {
 }
 
 // ─────────────────────────────
-// FIGHT CARD
+// BOTTOM SHEET CORE
 // ─────────────────────────────
-function hideFightCard() {
+function closeBottomSheet() {
   fightCard.classList.remove("show");
   tg.BackButton.hide();
-  tg.BackButton.offClick(hideFightCard);
+  tg.BackButton.offClick(closeBottomSheet);
 }
 
+// ─────────────────────────────
+// FIGHT CARD
+// ─────────────────────────────
 function showFightCard() {
   let html = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <h3>Fight Card</h3>
-      <span id="closeCard" style="cursor:pointer;font-size:20px">✕</span>
+      <span style="cursor:pointer;font-size:20px" id="closeSheet">✕</span>
     </div>
   `;
 
@@ -134,12 +136,46 @@ function showFightCard() {
   });
 
   html += `<button style="margin-top:12px" onclick="savePicks()">Save</button>`;
+
   fightCard.innerHTML = html;
   fightCard.classList.add("show");
 
-  document.getElementById("closeCard").onclick = hideFightCard;
+  document.getElementById("closeSheet").onclick = closeBottomSheet;
   tg.BackButton.show();
-  tg.BackButton.onClick(hideFightCard);
+  tg.BackButton.onClick(closeBottomSheet);
+}
+
+// ─────────────────────────────
+// MY PICKS (FIXED)
+// ─────────────────────────────
+function showMyPicks() {
+  let html = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3>My Picks</h3>
+      <span style="cursor:pointer;font-size:20px" id="closeSheet">✕</span>
+    </div>
+  `;
+
+  if (!Object.keys(picks).length) {
+    html += `<p>No picks yet</p>`;
+  } else {
+    Object.entries(picks).forEach(([id, p]) => {
+      const f = fights.find(x => x.id == id);
+      html += `
+        <div class="fight">
+          <strong>${f.f1} vs ${f.f2}</strong><br>
+          <small>${p.winner === 'f1' ? f.f1 : f.f2} — ${p.method}</small>
+        </div>
+      `;
+    });
+  }
+
+  fightCard.innerHTML = html;
+  fightCard.classList.add("show");
+
+  document.getElementById("closeSheet").onclick = closeBottomSheet;
+  tg.BackButton.show();
+  tg.BackButton.onClick(closeBottomSheet);
 }
 
 // ─────────────────────────────
@@ -159,38 +195,9 @@ window.pickMethod = (id, m) => {
 
 window.savePicks = () => {
   localStorage.setItem("picks", JSON.stringify(picks));
-  hideFightCard();
+  closeBottomSheet();
   renderMain();
 };
-
-// ─────────────────────────────
-// MY PICKS
-// ─────────────────────────────
-function showMyPicks() {
-  let html = `
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h3>My Picks</h3>
-        <span id="closeMyPicks" style="cursor:pointer;font-size:20px">✕</span>
-      </div>
-  `;
-
-  if (!Object.keys(picks).length) {
-    html += `<p>No picks yet</p>`;
-  } else {
-    Object.entries(picks).forEach(([id,p]) => {
-      const f = fights.find(x=>x.id==id);
-      html += `<p><strong>${f.f1} vs ${f.f2}</strong><br><small>${p.winner==='f1'?f.f1:f.f2} — ${p.method}</small></p>`;
-    });
-  }
-
-  html += `</div>`;
-  app.innerHTML = html;
-
-  document.getElementById("closeMyPicks").onclick = renderMain;
-  tg.BackButton.show();
-  tg.BackButton.onClick(renderMain);
-}
 
 // ─────────────────────────────
 // INIT
