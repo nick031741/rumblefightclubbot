@@ -12,10 +12,7 @@ tg.expand();
 // DEADLINE — НЕ ТРОГАЕМ
 // ─────────────────────────────
 const DEADLINE = new Date("2026-01-24T23:59:59+03:00").getTime();
-
-function isDeadlinePassed() {
-  return Date.now() > DEADLINE;
-}
+const isDeadlinePassed = () => Date.now() > DEADLINE;
 
 // ─────────────────────────────
 // DATA
@@ -31,7 +28,7 @@ const fights = [
   { id: 8, weight: "Bantamweight", f1: "Umar Nurmagomedov", f2: "Deiveson Figueiredo" },
   { id: 9, weight: "Middleweight", f1: "Ateba Gautier", f2: "Andrey Pulyaev" },
   { id: 10, weight: "Flyweight", f1: "Alex Perez", f2: "Charles Johnson" },
-  { id: 11, weight: "Women's Flyweight", f1: "Natália Silva", f2: "Rose Namajunas" },
+  { id: 11, weight: "Women's Flyweight", f1: "Natalía Silva", f2: "Rose Namajunas" },
   { id: 12, weight: "Heavyweight", f1: "Josh Hokit", f2: "Denzel Freeman" },
   { id: 13, weight: "Bantamweight", f1: "Ricky Turcios", f2: "Cameron Smotherman" }
 ];
@@ -45,15 +42,6 @@ const fightCard = document.getElementById("fightCard");
 
 let nickname = localStorage.getItem("nickname");
 let picks = JSON.parse(localStorage.getItem("picks") || "{}");
-
-// ─────────────────────────────
-// HELPERS
-// ─────────────────────────────
-function selectedStyle(active) {
-  return active
-    ? 'style="background:#2f80ed;color:#fff;border-color:#2f80ed"'
-    : '';
-}
 
 // ─────────────────────────────
 // NICKNAME
@@ -72,13 +60,7 @@ function showNicknameForm() {
 
 window.saveNickname = () => {
   const value = document.getElementById("nickInput").value.trim();
-  const error = document.getElementById("error");
-
-  if (!/^[a-zA-Z0-9_]{3,15}$/.test(value)) {
-    error.textContent = "Only a-z, 0-9, _, min 3 chars";
-    return;
-  }
-
+  if (!/^[a-zA-Z0-9_]{3,15}$/.test(value)) return;
   localStorage.setItem("nickname", value);
   nickname = value;
   renderMain();
@@ -98,7 +80,7 @@ function renderMain() {
       <img src="images/ufc324_official.jpg" class="poster" />
       <h3>UFC 324</h3>
       <p>Gaethje vs Pimblett</p>
-      <p style="opacity:.7;font-size:14px">25 January</p>
+      <p style="opacity:.6">25 January</p>
 
       <button id="enterPrediction" ${closed ? "disabled" : ""}>
         ${closed ? "PREDICTIONS CLOSED" : hasPicks ? "CHANGE MY PICKS" : "ENTER PREDICTION"}
@@ -107,15 +89,7 @@ function renderMain() {
   `;
 
   document.getElementById("enterPrediction").onclick = () => {
-    if (isDeadlinePassed()) {
-      tg.showPopup({
-        title: "Predictions closed",
-        message: "Predictions are locked for this event",
-        buttons: [{ type: "ok" }]
-      });
-      return;
-    }
-    showFightCard();
+    if (!isDeadlinePassed()) showFightCard();
   };
 
   document.getElementById("myPicksBtn").onclick = showMyPicks;
@@ -134,36 +108,32 @@ function showFightCard() {
   let html = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <h3>Fight Card</h3>
-      <span style="cursor:pointer;font-size:20px" id="closeCard">✕</span>
+      <span id="closeCard" style="cursor:pointer;font-size:20px">✕</span>
     </div>
   `;
 
   fights.forEach(f => {
-    const pick = picks[f.id] || {};
-
+    const p = picks[f.id] || {};
     html += `
       <div class="fight">
         <strong>${f.f1} vs ${f.f2}</strong>
         <span>${f.weight}</span>
 
         <div style="display:flex;gap:6px;margin-top:8px">
-          <button onclick="pickWinner(${f.id}, 'f1')" ${selectedStyle(pick.winner === 'f1')}>F1</button>
-          <button onclick="pickWinner(${f.id}, 'f2')" ${selectedStyle(pick.winner === 'f2')}>F2</button>
+          <button onclick="pickWinner(${f.id},'f1')" style="${p.winner==='f1'?'background:#444':''}">F1</button>
+          <button onclick="pickWinner(${f.id},'f2')" style="${p.winner==='f2'?'background:#444':''}">F2</button>
         </div>
 
         <div style="display:flex;gap:6px;margin-top:6px">
-          ${["KO/TKO","SUB","Decision"].map(m => `
-            <button onclick="pickMethod(${f.id}, '${m}')" ${selectedStyle(pick.method === m)}>
-              ${m}
-            </button>
-          `).join("")}
+          ${["KO/TKO","SUB","Decision"].map(m =>
+            `<button onclick="pickMethod(${f.id},'${m}')" style="${p.method===m?'background:#444':''}">${m}</button>`
+          ).join("")}
         </div>
       </div>
     `;
   });
 
   html += `<button style="margin-top:12px" onclick="savePicks()">Save</button>`;
-
   fightCard.innerHTML = html;
   fightCard.classList.add("show");
 
@@ -173,26 +143,21 @@ function showFightCard() {
 }
 
 // ─────────────────────────────
-// PICKS LOGIC
+// PICKS
 // ─────────────────────────────
-window.pickWinner = (id, who) => {
+window.pickWinner = (id, w) => {
   picks[id] = picks[id] || {};
-  picks[id].winner = who;
+  picks[id].winner = w;
   showFightCard();
 };
 
-window.pickMethod = (id, method) => {
+window.pickMethod = (id, m) => {
   picks[id] = picks[id] || {};
-  picks[id].method = method;
+  picks[id].method = m;
   showFightCard();
 };
 
 window.savePicks = () => {
-  if (isDeadlinePassed()) {
-    alert("Predictions are closed");
-    return;
-  }
-
   localStorage.setItem("picks", JSON.stringify(picks));
   hideFightCard();
   renderMain();
@@ -202,31 +167,33 @@ window.savePicks = () => {
 // MY PICKS
 // ─────────────────────────────
 function showMyPicks() {
-  let html = `<div class="card"><h3>My Picks</h3>`;
+  let html = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3>My Picks</h3>
+        <span id="closeMyPicks" style="cursor:pointer;font-size:20px">✕</span>
+      </div>
+  `;
 
-  if (Object.keys(picks).length === 0) {
+  if (!Object.keys(picks).length) {
     html += `<p>No picks yet</p>`;
   } else {
-    Object.entries(picks).forEach(([id, p]) => {
-      const f = fights.find(x => x.id == id);
-      html += `
-        <div style="margin-bottom:10px">
-          <strong>${f.f1} vs ${f.f2}</strong><br>
-          <small>${p.winner === "f1" ? f.f1 : f.f2} — ${p.method}</small>
-        </div>
-      `;
+    Object.entries(picks).forEach(([id,p]) => {
+      const f = fights.find(x=>x.id==id);
+      html += `<p><strong>${f.f1} vs ${f.f2}</strong><br><small>${p.winner==='f1'?f.f1:f.f2} — ${p.method}</small></p>`;
     });
   }
 
   html += `</div>`;
   app.innerHTML = html;
+
+  document.getElementById("closeMyPicks").onclick = renderMain;
+  tg.BackButton.show();
+  tg.BackButton.onClick(renderMain);
 }
 
 // ─────────────────────────────
 // INIT
 // ─────────────────────────────
-if (!nickname) {
-  showNicknameForm();
-} else {
-  renderMain();
-}
+if (!nickname) showNicknameForm();
+else renderMain();
