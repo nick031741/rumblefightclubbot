@@ -13,11 +13,10 @@ const nicknameEl = document.getElementById("nickname");
 const fightCard = document.getElementById("fightCard");
 
 let nickname = localStorage.getItem("nickname");
-let predictions = JSON.parse(localStorage.getItem("predictions") || "{}");
 
-// ───────────────
+// ─────────────────────────────
 // NICKNAME
-// ───────────────
+// ─────────────────────────────
 function showNicknameForm() {
   app.innerHTML = `
     <div class="card">
@@ -25,7 +24,7 @@ function showNicknameForm() {
       <input id="nickInput" placeholder="nickname"
         style="width:100%;padding:12px;border-radius:10px;border:none;margin:12px 0;background:#2a2a2a;color:#fff;" />
       <button onclick="saveNickname()">Continue</button>
-      <div id="error" style="color:#ff6b6b;font-size:13px;margin-top:8px"></div>
+      <div id="error" style="color:#aaa;font-size:13px;margin-top:8px"></div>
     </div>
   `;
 }
@@ -44,9 +43,9 @@ window.saveNickname = () => {
   renderMain();
 };
 
-// ───────────────
+// ─────────────────────────────
 // MAIN SCREEN
-// ───────────────
+// ─────────────────────────────
 function renderMain() {
   nicknameEl.textContent = nickname;
 
@@ -62,88 +61,116 @@ function renderMain() {
   document.getElementById("enterPrediction").onclick = showFightCard;
 }
 
-// ───────────────
+// ─────────────────────────────
 // FIGHT CARD
-// ───────────────
+// ─────────────────────────────
+function showFightCard() {
+  const fights = [
+    { id: 1, weight: "Lightweight", f1: "Gaethje", f2: "Pimblett" },
+    { id: 2, weight: "Women's Bantamweight", f1: "Harrison", f2: "Nunes" },
+    { id: 3, weight: "Bantamweight", f1: "O'Malley", f2: "Yadong" },
+    { id: 4, weight: "Heavyweight", f1: "Cortes-Acosta", f2: "Lewis" },
+    { id: 5, weight: "Featherweight", f1: "Allen", f2: "Silva" },
+    { id: 6, weight: "Lightweight", f1: "Johnson", f2: "Hernandez" },
+    { id: 7, weight: "Light Heavyweight", f1: "Krylov", f2: "Bukauskas" },
+    { id: 8, weight: "Bantamweight", f1: "Nurmagomedov", f2: "Figueiredo" },
+    { id: 9, weight: "Middleweight", f1: "Gautier", f2: "Pulyaev" },
+    { id: 10, weight: "Flyweight", f1: "Perez", f2: "Johnson" },
+    { id: 11, weight: "Women's Flyweight", f1: "Silva", f2: "Namajunas" },
+    { id: 12, weight: "Heavyweight", f1: "Hokit", f2: "Freeman" },
+    { id: 13, weight: "Bantamweight", f1: "Turcios", f2: "Smotherman" }
+  ];
+
+  fightCard.innerHTML = `
+    <h3 style="margin-bottom:12px">Fight Card</h3>
+
+    ${fights.map(f => `
+      <div class="fight" data-id="${f.id}">
+        <div class="fight-title">${f.f1} vs ${f.f2}</div>
+        <div class="weight">${f.weight}</div>
+
+        <div class="row">
+          <div class="pick" data-pick="F1">F1</div>
+          <div class="pick" data-pick="F2">F2</div>
+        </div>
+
+        <div class="row">
+          <div class="method" data-method="KO/TKO">KO/TKO</div>
+          <div class="method" data-method="SUB">SUB</div>
+          <div class="method" data-method="DEC">DEC</div>
+        </div>
+      </div>
+    `).join("")}
+
+    <button id="savePredictions">SAVE</button>
+  `;
+
+  fightCard.classList.add("show");
+
+  tg.BackButton.show();
+  tg.BackButton.onClick(hideFightCard);
+
+  initPredictionLogic();
+}
+
 function hideFightCard() {
   fightCard.classList.remove("show");
   tg.BackButton.hide();
   tg.BackButton.offClick(hideFightCard);
 }
 
-function savePrediction(fightId, data) {
-  predictions[fightId] = data;
-  localStorage.setItem("predictions", JSON.stringify(predictions));
+// ─────────────────────────────
+// LOGIC
+// ─────────────────────────────
+function initPredictionLogic() {
+  document.querySelectorAll(".fight").forEach(fight => {
+    const picks = fight.querySelectorAll(".pick");
+    const methods = fight.querySelectorAll(".method");
+
+    picks.forEach(p => {
+      p.onclick = () => {
+        picks.forEach(x => x.classList.remove("active"));
+        p.classList.add("active");
+      };
+    });
+
+    methods.forEach(m => {
+      m.onclick = () => {
+        methods.forEach(x => x.classList.remove("active"));
+        m.classList.add("active");
+      };
+    });
+  });
+
+  document.getElementById("savePredictions").onclick = savePredictions;
 }
 
-function showFightCard() {
-  const fights = [
-    { id: 1, weight: "Lightweight", red: "Justin Gaethje", blue: "Paddy Pimblett" },
-    { id: 2, weight: "Women's Bantamweight", red: "Kayla Harrison", blue: "Amanda Nunes" },
-    { id: 3, weight: "Bantamweight", red: "Sean O'Malley", blue: "Song Yadong" },
-    { id: 4, weight: "Heavyweight", red: "Waldo Cortes-Acosta", blue: "Derrick Lewis" },
-    { id: 5, weight: "Featherweight", red: "Arnold Allen", blue: "Jean Silva" },
-    { id: 6, weight: "Lightweight", red: "Michael Johnson", blue: "Alexander Hernandez" },
-    { id: 7, weight: "Light Heavyweight", red: "Nikita Krylov", blue: "Modestas Bukauskas" },
-    { id: 8, weight: "Bantamweight", red: "Umar Nurmagomedov", blue: "Deiveson Figueiredo" },
-    { id: 9, weight: "Middleweight", red: "Ateba Gautier", blue: "Andrey Pulyaev" },
-    { id: 10, weight: "Flyweight", red: "Alex Perez", blue: "Charles Johnson" },
-    { id: 11, weight: "Women's Flyweight", red: "Natália Silva", blue: "Rose Namajunas" },
-    { id: 12, weight: "Heavyweight", red: "Josh Hokit", blue: "Denzel Freeman" },
-    { id: 13, weight: "Bantamweight", red: "Ricky Turcios", blue: "Cameron Smotherman" }
-  ];
+// ─────────────────────────────
+// SAVE
+// ─────────────────────────────
+function savePredictions() {
+  const result = [];
 
-  fightCard.innerHTML = `
-    <h3 style="margin-bottom:12px">Fight Card</h3>
-    ${fights.map(f => {
-      const saved = predictions[f.id] || {};
-      return `
-        <div class="fight">
-          <div><b>${f.red}</b> vs <b>${f.blue}</b></div>
-          <span>${f.weight}</span>
+  document.querySelectorAll(".fight").forEach(fight => {
+    const id = fight.dataset.id;
+    const pick = fight.querySelector(".pick.active")?.dataset.pick || null;
+    const method = fight.querySelector(".method.active")?.dataset.method || null;
 
-          <div style="margin-top:8px">
-            <button class="pick ${saved.winner === 'red' ? 'active' : ''}"
-              onclick="pickWinner(${f.id}, 'red', '${f.red}')">${f.red}</button>
+    result.push({ fightId: id, pick, method });
+  });
 
-            <button class="pick ${saved.winner === 'blue' ? 'active' : ''}"
-              onclick="pickWinner(${f.id}, 'blue', '${f.blue}')">${f.blue}</button>
-          </div>
+  localStorage.setItem("predictions", JSON.stringify(result));
 
-          <div style="margin-top:6px">
-            ${["KO/TKO", "SUB", "DEC"].map(m => `
-              <button class="method ${saved.method === m ? 'active' : ''}"
-                onclick="pickMethod(${f.id}, '${m}')">${m}</button>
-            `).join("")}
-          </div>
-        </div>
-      `;
-    }).join("")}
-  `;
-
-  fightCard.classList.add("show");
-  tg.BackButton.show();
-  tg.BackButton.onClick(hideFightCard);
+  tg.showPopup({
+    title: "Saved",
+    message: "Predictions saved 👊",
+    buttons: [{ type: "ok", text: "OK" }]
+  });
 }
 
-// ───────────────
-// PICK HANDLERS
-// ───────────────
-window.pickWinner = (fightId, side, name) => {
-  const current = predictions[fightId] || {};
-  savePrediction(fightId, { ...current, winner: side, fighter: name });
-  showFightCard();
-};
-
-window.pickMethod = (fightId, method) => {
-  const current = predictions[fightId] || {};
-  savePrediction(fightId, { ...current, method });
-  showFightCard();
-};
-
-// ───────────────
+// ─────────────────────────────
 // INIT
-// ───────────────
+// ─────────────────────────────
 if (!nickname) {
   showNicknameForm();
 } else {
