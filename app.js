@@ -11,7 +11,7 @@ tg.expand();
 // ─────────────────────────────
 // DEADLINE — 24 January 2025, 23:59 MSK
 // ─────────────────────────────
-const DEADLINE = new Date("2025-01-24T23:59:59+03:00").getTime();
+const DEADLINE = new Date("2026-01-24T23:59:59+03:00").getTime();
 
 function isDeadlinePassed() {
   return Date.now() > DEADLINE;
