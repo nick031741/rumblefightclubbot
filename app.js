@@ -9,14 +9,13 @@ tg.ready();
 tg.expand();
 
 // ─────────────────────────────
-// DEADLINE — 24 January 2025, 23:59 MSK
+// DEADLINE — НЕ ТРОГАЕМ
 // ─────────────────────────────
 const DEADLINE = new Date("2026-01-24T23:59:59+03:00").getTime();
 
 function isDeadlinePassed() {
   return Date.now() > DEADLINE;
 }
-
 
 // ─────────────────────────────
 // DATA
@@ -32,7 +31,7 @@ const fights = [
   { id: 8, weight: "Bantamweight", f1: "Umar Nurmagomedov", f2: "Deiveson Figueiredo" },
   { id: 9, weight: "Middleweight", f1: "Ateba Gautier", f2: "Andrey Pulyaev" },
   { id: 10, weight: "Flyweight", f1: "Alex Perez", f2: "Charles Johnson" },
-  { id: 11, weight: "Women's Flyweight", f1: "Natalía Silva", f2: "Rose Namajunas" },
+  { id: 11, weight: "Women's Flyweight", f1: "Natália Silva", f2: "Rose Namajunas" },
   { id: 12, weight: "Heavyweight", f1: "Josh Hokit", f2: "Denzel Freeman" },
   { id: 13, weight: "Bantamweight", f1: "Ricky Turcios", f2: "Cameron Smotherman" }
 ];
@@ -46,6 +45,15 @@ const fightCard = document.getElementById("fightCard");
 
 let nickname = localStorage.getItem("nickname");
 let picks = JSON.parse(localStorage.getItem("picks") || "{}");
+
+// ─────────────────────────────
+// HELPERS
+// ─────────────────────────────
+function selectedStyle(active) {
+  return active
+    ? 'style="background:#2f80ed;color:#fff;border-color:#2f80ed"'
+    : '';
+}
 
 // ─────────────────────────────
 // NICKNAME
@@ -80,9 +88,7 @@ window.saveNickname = () => {
 // MAIN
 // ─────────────────────────────
 function renderMain() {
-  nicknameEl.innerHTML = `
-    <span id="myPicksBtn" style="cursor:pointer">My picks</span>
-  `;
+  nicknameEl.innerHTML = `<span id="myPicksBtn" style="cursor:pointer">My picks</span>`;
 
   const hasPicks = Object.keys(picks).length > 0;
   const closed = isDeadlinePassed();
@@ -92,6 +98,7 @@ function renderMain() {
       <img src="images/ufc324_official.jpg" class="poster" />
       <h3>UFC 324</h3>
       <p>Gaethje vs Pimblett</p>
+      <p style="opacity:.7;font-size:14px">25 January</p>
 
       <button id="enterPrediction" ${closed ? "disabled" : ""}>
         ${closed ? "PREDICTIONS CLOSED" : hasPicks ? "CHANGE MY PICKS" : "ENTER PREDICTION"}
@@ -133,20 +140,20 @@ function showFightCard() {
 
   fights.forEach(f => {
     const pick = picks[f.id] || {};
+
     html += `
       <div class="fight">
         <strong>${f.f1} vs ${f.f2}</strong>
         <span>${f.weight}</span>
 
         <div style="display:flex;gap:6px;margin-top:8px">
-          <button onclick="pickWinner(${f.id}, 'f1')" ${pick.winner === 'f1' ? 'style="opacity:1"' : ''}>F1</button>
-          <button onclick="pickWinner(${f.id}, 'f2')" ${pick.winner === 'f2' ? 'style="opacity:1"' : ''}>F2</button>
+          <button onclick="pickWinner(${f.id}, 'f1')" ${selectedStyle(pick.winner === 'f1')}>F1</button>
+          <button onclick="pickWinner(${f.id}, 'f2')" ${selectedStyle(pick.winner === 'f2')}>F2</button>
         </div>
 
         <div style="display:flex;gap:6px;margin-top:6px">
           ${["KO/TKO","SUB","Decision"].map(m => `
-            <button onclick="pickMethod(${f.id}, '${m}')"
-              ${pick.method === m ? 'style="opacity:1"' : ''}>
+            <button onclick="pickMethod(${f.id}, '${m}')" ${selectedStyle(pick.method === m)}>
               ${m}
             </button>
           `).join("")}
@@ -161,7 +168,6 @@ function showFightCard() {
   fightCard.classList.add("show");
 
   document.getElementById("closeCard").onclick = hideFightCard;
-
   tg.BackButton.show();
   tg.BackButton.onClick(hideFightCard);
 }
@@ -196,16 +202,23 @@ window.savePicks = () => {
 // MY PICKS
 // ─────────────────────────────
 function showMyPicks() {
-  let html = `
-    <div class="card">
-      <h3>My Picks</h3>
-      ${Object.keys(picks).length === 0 ? "<p>No picks yet</p>" : ""}
-      ${Object.entries(picks).map(([id, p]) => {
-        const f = fights.find(x => x.id == id);
-        return `<p>${f.f1} vs ${f.f2}<br><small>${p.winner?.toUpperCase()} — ${p.method}</small></p>`;
-      }).join("")}
-    </div>
-  `;
+  let html = `<div class="card"><h3>My Picks</h3>`;
+
+  if (Object.keys(picks).length === 0) {
+    html += `<p>No picks yet</p>`;
+  } else {
+    Object.entries(picks).forEach(([id, p]) => {
+      const f = fights.find(x => x.id == id);
+      html += `
+        <div style="margin-bottom:10px">
+          <strong>${f.f1} vs ${f.f2}</strong><br>
+          <small>${p.winner === "f1" ? f.f1 : f.f2} — ${p.method}</small>
+        </div>
+      `;
+    });
+  }
+
+  html += `</div>`;
   app.innerHTML = html;
 }
 
