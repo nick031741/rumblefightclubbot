@@ -1,10 +1,5 @@
 const tg = window.Telegram?.WebApp;
 
-if (!tg) {
-  document.body.innerHTML = "<p>Open via Telegram</p>";
-  throw new Error("Not Telegram");
-}
-
 tg.ready();
 tg.expand();
 
@@ -14,6 +9,15 @@ const fightCard = document.getElementById("fightCard");
 
 let nickname = localStorage.getItem("nickname");
 let predictions = JSON.parse(localStorage.getItem("predictions") || "{}");
+
+// ───────────────
+// DEADLINE
+// ───────────────
+const DEADLINE = new Date(2025, 0, 24, 23, 59); // 24 Jan 23:59
+
+function isDeadlinePassed() {
+  return new Date() > DEADLINE;
+}
 
 // ───────────────
 // NICKNAME
@@ -55,24 +59,45 @@ function renderMain() {
   `;
 
   const hasPicks = Object.keys(predictions).length > 0;
+  const locked = isDeadlinePassed();
 
   app.innerHTML = `
     <div class="card">
       <img src="images/ufc324_official.jpg" class="poster" />
       <h3>UFC 324</h3>
       <p>Gaethje vs Pimblett</p>
-      <button id="enterPrediction">
-        ${hasPicks ? "CHANGE MY PICKS" : "ENTER PREDICTION"}
+
+      <button id="enterPrediction" ${locked ? "disabled" : ""}>
+        ${locked
+          ? "PREDICTIONS CLOSED"
+          : hasPicks
+          ? "CHANGE MY PICKS"
+          : "ENTER PREDICTION"}
       </button>
+
+      <div style="margin-top:10px;font-size:12px;opacity:.6">
+        Deadline: Jan 24 · 23:59
+      </div>
     </div>
   `;
 
-  document.getElementById("enterPrediction").onclick = showFightCard;
+  document.getElementById("enterPrediction").onclick = () => {
+    if (locked) {
+      tg.showPopup({
+        title: "Predictions closed",
+        message: "The deadline has passed. You can no longer change your picks.",
+        buttons: [{ type: "ok" }]
+      });
+      return;
+    }
+    showFightCard();
+  };
+
   document.getElementById("myPicksBtn").onclick = showMyPicks;
 }
 
 // ───────────────
-// FIGHT CARD
+// FIGHTS
 // ───────────────
 const fights = [
   { weight: "Lightweight", red: "Justin Gaethje", blue: "Paddy Pimblett" },
@@ -90,9 +115,16 @@ const fights = [
   { weight: "Bantamweight", red: "Ricky Turcios", blue: "Cameron Smotherman" }
 ];
 
+// ───────────────
+// FIGHT CARD
+// ───────────────
 function showFightCard() {
   fightCard.innerHTML = `
-    <h3 style="margin-bottom:12px">Fight Card</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3>Fight Card</h3>
+      <div id="closeCard" style="font-size:22px;cursor:pointer;opacity:.7">✕</div>
+    </div>
+
     ${fights.map((f, i) => `
       <div class="fight">
         <div class="fight-title">${f.red} vs ${f.blue}</div>
@@ -117,8 +149,11 @@ function showFightCard() {
   `;
 
   fightCard.classList.add("show");
+
   tg.BackButton.show();
   tg.BackButton.onClick(hideFightCard);
+
+  document.getElementById("closeCard").onclick = hideFightCard;
 
   bindPredictionClicks();
 }
@@ -133,11 +168,12 @@ function hideFightCard() {
 // PICKS LOGIC
 // ───────────────
 function bindPredictionClicks() {
+  if (isDeadlinePassed()) return;
+
   document.querySelectorAll(".pick").forEach(btn => {
     btn.onclick = () => {
       const fight = btn.dataset.fight;
-      document
-        .querySelectorAll(`.pick[data-fight="${fight}"]`)
+      document.querySelectorAll(`.pick[data-fight="${fight}"]`)
         .forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       predictions[fight] = predictions[fight] || {};
@@ -148,8 +184,7 @@ function bindPredictionClicks() {
   document.querySelectorAll(".method").forEach(btn => {
     btn.onclick = () => {
       const fight = btn.dataset.fight;
-      document
-        .querySelectorAll(`.method[data-fight="${fight}"]`)
+      document.querySelectorAll(`.method[data-fight="${fight}"]`)
         .forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       predictions[fight] = predictions[fight] || {};
@@ -158,6 +193,15 @@ function bindPredictionClicks() {
   });
 
   document.getElementById("savePredictions").onclick = () => {
+    if (isDeadlinePassed()) {
+      tg.showPopup({
+        title: "Too late",
+        message: "Deadline has passed. Picks are locked.",
+        buttons: [{ type: "ok" }]
+      });
+      return;
+    }
+
     localStorage.setItem("predictions", JSON.stringify(predictions));
     hideFightCard();
     renderMain();
@@ -166,7 +210,7 @@ function bindPredictionClicks() {
 }
 
 // ───────────────
-// MY PICKS VIEW
+// MY PICKS
 // ───────────────
 function showMyPicks() {
   if (!Object.keys(predictions).length) {
@@ -179,7 +223,11 @@ function showMyPicks() {
   }
 
   fightCard.innerHTML = `
-    <h3 style="margin-bottom:12px">My Picks</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3>My Picks</h3>
+      <div id="closeCard" style="font-size:22px;cursor:pointer;opacity:.7">✕</div>
+    </div>
+
     ${Object.entries(predictions).map(([i, p]) => `
       <div class="fight">
         <div class="fight-title">
@@ -193,8 +241,10 @@ function showMyPicks() {
   `;
 
   fightCard.classList.add("show");
+
   tg.BackButton.show();
   tg.BackButton.onClick(hideFightCard);
+  document.getElementById("closeCard").onclick = hideFightCard;
 }
 
 // ───────────────
