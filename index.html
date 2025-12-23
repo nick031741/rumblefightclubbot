@@ -23,10 +23,10 @@
     }
 
     /* ───────────────
-       TOP BAR
+       HEADER
     ─────────────── */
 
-    .topbar {
+    header {
       position: absolute;
       top: 16px;
       left: 16px;
@@ -44,20 +44,27 @@
       line-height: 1.2;
     }
 
-    .menu {
+    .nav {
       display: flex;
       gap: 14px;
-      font-size: 12px;
-      opacity: 0.9;
+      align-items: center;
     }
 
-    .menu-item {
+    .nav-btn {
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 1px;
       cursor: pointer;
-      white-space: nowrap;
+      opacity: 0.9;
+      user-select: none;
+    }
+
+    .nav-btn:active {
+      opacity: 0.6;
     }
 
     /* ───────────────
-       MAIN APP
+       APP
     ─────────────── */
 
     #app {
@@ -188,15 +195,15 @@
 
 <body>
 
-<header class="topbar">
+<header>
   <div class="logo">
     RUMBLE<br>FIGHT CLUB
   </div>
 
-  <div class="menu">
-    <span class="menu-item">LEADERBOARD</span>
-    <span class="menu-item">QUIZ</span>
-    <span class="menu-item" id="nickname"></span>
+  <div class="nav">
+    <div class="nav-btn">LEADERBOARD</div>
+    <div class="nav-btn">QUIZ</div>
+    <div class="nav-btn" id="myPicksBtn">MY PICKS</div>
   </div>
 </header>
 
