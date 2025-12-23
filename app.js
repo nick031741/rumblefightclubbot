@@ -9,13 +9,14 @@ tg.ready();
 tg.expand();
 
 // ─────────────────────────────
-// DEADLINE (24 Jan 23:59 MSK → 20:59 UTC)
+// DEADLINE — 24 January 2025, 23:59 MSK
 // ─────────────────────────────
-const DEADLINE_UTC = Date.UTC(2025, 0, 24, 20, 59, 0);
+const DEADLINE = new Date("2025-01-24T23:59:59+03:00").getTime();
 
 function isDeadlinePassed() {
-  return Date.now() >= DEADLINE_UTC;
+  return Date.now() > DEADLINE;
 }
+
 
 // ─────────────────────────────
 // DATA
