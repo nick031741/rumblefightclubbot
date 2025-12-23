@@ -13,10 +13,11 @@ const nicknameEl = document.getElementById("nickname");
 const fightCard = document.getElementById("fightCard");
 
 let nickname = localStorage.getItem("nickname");
+let predictions = JSON.parse(localStorage.getItem("predictions") || "{}");
 
-// ─────────────────────────────
+// ───────────────
 // NICKNAME
-// ─────────────────────────────
+// ───────────────
 function showNicknameForm() {
   app.innerHTML = `
     <div class="card">
@@ -24,7 +25,7 @@ function showNicknameForm() {
       <input id="nickInput" placeholder="nickname"
         style="width:100%;padding:12px;border-radius:10px;border:none;margin:12px 0;background:#2a2a2a;color:#fff;" />
       <button onclick="saveNickname()">Continue</button>
-      <div id="error" style="color:#aaa;font-size:13px;margin-top:8px"></div>
+      <div id="error" style="color:#ff6b6b;font-size:13px;margin-top:8px"></div>
     </div>
   `;
 }
@@ -43,61 +44,71 @@ window.saveNickname = () => {
   renderMain();
 };
 
-// ─────────────────────────────
+// ───────────────
 // MAIN SCREEN
-// ─────────────────────────────
+// ───────────────
 function renderMain() {
-  nicknameEl.textContent = nickname;
+  nicknameEl.innerHTML = `
+    <span style="cursor:pointer" id="myPicksBtn">
+      ${nickname} · My picks
+    </span>
+  `;
+
+  const hasPicks = Object.keys(predictions).length > 0;
 
   app.innerHTML = `
     <div class="card">
       <img src="images/ufc324_official.jpg" class="poster" />
       <h3>UFC 324</h3>
       <p>Gaethje vs Pimblett</p>
-      <button id="enterPrediction">ENTER PREDICTION</button>
+      <button id="enterPrediction">
+        ${hasPicks ? "CHANGE MY PICKS" : "ENTER PREDICTION"}
+      </button>
     </div>
   `;
 
   document.getElementById("enterPrediction").onclick = showFightCard;
+  document.getElementById("myPicksBtn").onclick = showMyPicks;
 }
 
-// ─────────────────────────────
+// ───────────────
 // FIGHT CARD
-// ─────────────────────────────
-function showFightCard() {
-  const fights = [
-    { id: 1, weight: "Lightweight", f1: "Gaethje", f2: "Pimblett" },
-    { id: 2, weight: "Women's Bantamweight", f1: "Harrison", f2: "Nunes" },
-    { id: 3, weight: "Bantamweight", f1: "O'Malley", f2: "Yadong" },
-    { id: 4, weight: "Heavyweight", f1: "Cortes-Acosta", f2: "Lewis" },
-    { id: 5, weight: "Featherweight", f1: "Allen", f2: "Silva" },
-    { id: 6, weight: "Lightweight", f1: "Johnson", f2: "Hernandez" },
-    { id: 7, weight: "Light Heavyweight", f1: "Krylov", f2: "Bukauskas" },
-    { id: 8, weight: "Bantamweight", f1: "Nurmagomedov", f2: "Figueiredo" },
-    { id: 9, weight: "Middleweight", f1: "Gautier", f2: "Pulyaev" },
-    { id: 10, weight: "Flyweight", f1: "Perez", f2: "Johnson" },
-    { id: 11, weight: "Women's Flyweight", f1: "Silva", f2: "Namajunas" },
-    { id: 12, weight: "Heavyweight", f1: "Hokit", f2: "Freeman" },
-    { id: 13, weight: "Bantamweight", f1: "Turcios", f2: "Smotherman" }
-  ];
+// ───────────────
+const fights = [
+  { weight: "Lightweight", red: "Justin Gaethje", blue: "Paddy Pimblett" },
+  { weight: "Women's Bantamweight", red: "Kayla Harrison", blue: "Amanda Nunes" },
+  { weight: "Bantamweight", red: "Sean O'Malley", blue: "Song Yadong" },
+  { weight: "Heavyweight", red: "Waldo Cortes-Acosta", blue: "Derrick Lewis" },
+  { weight: "Featherweight", red: "Arnold Allen", blue: "Jean Silva" },
+  { weight: "Lightweight", red: "Michael Johnson", blue: "Alexander Hernandez" },
+  { weight: "Light Heavyweight", red: "Nikita Krylov", blue: "Modestas Bukauskas" },
+  { weight: "Bantamweight", red: "Umar Nurmagomedov", blue: "Deiveson Figueiredo" },
+  { weight: "Middleweight", red: "Ateba Gautier", blue: "Andrey Pulyaev" },
+  { weight: "Flyweight", red: "Alex Perez", blue: "Charles Johnson" },
+  { weight: "Women's Flyweight", red: "Natália Silva", blue: "Rose Namajunas" },
+  { weight: "Heavyweight", red: "Josh Hokit", blue: "Denzel Freeman" },
+  { weight: "Bantamweight", red: "Ricky Turcios", blue: "Cameron Smotherman" }
+];
 
+function showFightCard() {
   fightCard.innerHTML = `
     <h3 style="margin-bottom:12px">Fight Card</h3>
-
-    ${fights.map(f => `
-      <div class="fight" data-id="${f.id}">
-        <div class="fight-title">${f.f1} vs ${f.f2}</div>
+    ${fights.map((f, i) => `
+      <div class="fight">
+        <div class="fight-title">${f.red} vs ${f.blue}</div>
         <div class="weight">${f.weight}</div>
 
         <div class="row">
-          <div class="pick" data-pick="F1">F1</div>
-          <div class="pick" data-pick="F2">F2</div>
+          <div class="pick" data-fight="${i}" data-winner="${f.red}">F1</div>
+          <div class="pick" data-fight="${i}" data-winner="${f.blue}">F2</div>
         </div>
 
         <div class="row">
-          <div class="method" data-method="KO/TKO">KO/TKO</div>
-          <div class="method" data-method="SUB">SUB</div>
-          <div class="method" data-method="DEC">DEC</div>
+          ${["KO/TKO","SUB","Decision"].map(m => `
+            <div class="method" data-fight="${i}" data-method="${m}">
+              ${m}
+            </div>
+          `).join("")}
         </div>
       </div>
     `).join("")}
@@ -106,11 +117,10 @@ function showFightCard() {
   `;
 
   fightCard.classList.add("show");
-
   tg.BackButton.show();
   tg.BackButton.onClick(hideFightCard);
 
-  initPredictionLogic();
+  bindPredictionClicks();
 }
 
 function hideFightCard() {
@@ -119,58 +129,77 @@ function hideFightCard() {
   tg.BackButton.offClick(hideFightCard);
 }
 
-// ─────────────────────────────
-// LOGIC
-// ─────────────────────────────
-function initPredictionLogic() {
-  document.querySelectorAll(".fight").forEach(fight => {
-    const picks = fight.querySelectorAll(".pick");
-    const methods = fight.querySelectorAll(".method");
-
-    picks.forEach(p => {
-      p.onclick = () => {
-        picks.forEach(x => x.classList.remove("active"));
-        p.classList.add("active");
-      };
-    });
-
-    methods.forEach(m => {
-      m.onclick = () => {
-        methods.forEach(x => x.classList.remove("active"));
-        m.classList.add("active");
-      };
-    });
+// ───────────────
+// PICKS LOGIC
+// ───────────────
+function bindPredictionClicks() {
+  document.querySelectorAll(".pick").forEach(btn => {
+    btn.onclick = () => {
+      const fight = btn.dataset.fight;
+      document
+        .querySelectorAll(`.pick[data-fight="${fight}"]`)
+        .forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      predictions[fight] = predictions[fight] || {};
+      predictions[fight].winner = btn.dataset.winner;
+    };
   });
 
-  document.getElementById("savePredictions").onclick = savePredictions;
+  document.querySelectorAll(".method").forEach(btn => {
+    btn.onclick = () => {
+      const fight = btn.dataset.fight;
+      document
+        .querySelectorAll(`.method[data-fight="${fight}"]`)
+        .forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      predictions[fight] = predictions[fight] || {};
+      predictions[fight].method = btn.dataset.method;
+    };
+  });
+
+  document.getElementById("savePredictions").onclick = () => {
+    localStorage.setItem("predictions", JSON.stringify(predictions));
+    hideFightCard();
+    renderMain();
+    tg.HapticFeedback.notificationOccurred("success");
+  };
 }
 
-// ─────────────────────────────
-// SAVE
-// ─────────────────────────────
-function savePredictions() {
-  const result = [];
+// ───────────────
+// MY PICKS VIEW
+// ───────────────
+function showMyPicks() {
+  if (!Object.keys(predictions).length) {
+    tg.showPopup({
+      title: "No picks",
+      message: "You haven't made any predictions yet.",
+      buttons: [{ type: "ok" }]
+    });
+    return;
+  }
 
-  document.querySelectorAll(".fight").forEach(fight => {
-    const id = fight.dataset.id;
-    const pick = fight.querySelector(".pick.active")?.dataset.pick || null;
-    const method = fight.querySelector(".method.active")?.dataset.method || null;
+  fightCard.innerHTML = `
+    <h3 style="margin-bottom:12px">My Picks</h3>
+    ${Object.entries(predictions).map(([i, p]) => `
+      <div class="fight">
+        <div class="fight-title">
+          ${fights[i].red} vs ${fights[i].blue}
+        </div>
+        <div class="weight">
+          ${p.winner} · ${p.method || "-"}
+        </div>
+      </div>
+    `).join("")}
+  `;
 
-    result.push({ fightId: id, pick, method });
-  });
-
-  localStorage.setItem("predictions", JSON.stringify(result));
-
-  tg.showPopup({
-    title: "Saved",
-    message: "Predictions saved 👊",
-    buttons: [{ type: "ok", text: "OK" }]
-  });
+  fightCard.classList.add("show");
+  tg.BackButton.show();
+  tg.BackButton.onClick(hideFightCard);
 }
 
-// ─────────────────────────────
+// ───────────────
 // INIT
-// ─────────────────────────────
+// ───────────────
 if (!nickname) {
   showNicknameForm();
 } else {
