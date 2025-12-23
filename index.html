@@ -22,44 +22,44 @@
       overflow-x: hidden;
     }
 
-    /* HEADER */
-    header {
+    /* ───────────────
+       TOP BAR
+    ─────────────── */
+
+    .topbar {
       position: absolute;
       top: 16px;
       left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      z-index: 20;
+    }
+
+    .logo {
       font-weight: 800;
       font-size: 14px;
       letter-spacing: 1px;
       line-height: 1.2;
     }
 
-    /* HEADER RIGHT */
-    .nickname {
-      position: absolute;
-      top: 34px;
-      right: 16px;
+    .menu {
       display: flex;
       gap: 14px;
       font-size: 12px;
-      align-items: center;
+      opacity: 0.9;
     }
 
-    .header-link {
-      opacity: 0.6;
-      cursor: default;
-    }
-
-    #myPicksBtn {
-      text-transform: uppercase;
-      font-weight: 700;
-      padding: 6px 10px;
-      border-radius: 8px;
-      background: #222;
-      opacity: 1;
+    .menu-item {
       cursor: pointer;
+      white-space: nowrap;
     }
 
-    /* APP */
+    /* ───────────────
+       MAIN APP
+    ─────────────── */
+
     #app {
       min-height: 100vh;
       display: flex;
@@ -68,7 +68,6 @@
       padding: 16px;
     }
 
-    /* CARD */
     .card {
       background: #1a1a1a;
       border: 1px solid #2a2a2a;
@@ -89,23 +88,11 @@
       margin-bottom: 6px;
     }
 
-    .card h3.main-fight {
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
     .card p {
       opacity: 0.8;
       margin-bottom: 16px;
     }
 
-    .event-date {
-      text-transform: uppercase;
-      font-size: 13px;
-      letter-spacing: 1px;
-    }
-
-    /* BUTTONS */
     button {
       width: 100%;
       padding: 14px;
@@ -201,16 +188,17 @@
 
 <body>
 
-<header>
-  RUMBLE<br>
-  FIGHT CLUB
-</header>
+<header class="topbar">
+  <div class="logo">
+    RUMBLE<br>FIGHT CLUB
+  </div>
 
-<div class="nickname" id="nickname">
-  <span class="header-link">LEADERBOARD</span>
-  <span class="header-link">QUIZ</span>
-  <span id="myPicksBtn">MY PICKS</span>
-</div>
+  <div class="menu">
+    <span class="menu-item">LEADERBOARD</span>
+    <span class="menu-item">QUIZ</span>
+    <span class="menu-item" id="nickname"></span>
+  </div>
+</header>
 
 <div id="app"></div>
 
