@@ -22,7 +22,10 @@
       overflow-x: hidden;
     }
 
-    /* HEADER */
+    /* ───────────────
+       HEADER
+    ─────────────── */
+
     header {
       position: absolute;
       top: 16px;
@@ -68,7 +71,10 @@
       opacity: 0.8;
     }
 
-    /* APP */
+    /* ───────────────
+       APP
+    ─────────────── */
+
     #app {
       min-height: 100vh;
       display: flex;
@@ -118,7 +124,10 @@
       transform: scale(0.97);
     }
 
-    /* BOTTOM SHEET */
+    /* ───────────────
+       BOTTOM SHEET
+    ─────────────── */
+
     .bottom-sheet {
       position: fixed;
       left: 0;
@@ -148,6 +157,47 @@
     .fight:last-child {
       border-bottom: none;
     }
+
+    .fight-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .weight {
+      font-size: 12px;
+      opacity: 0.6;
+      margin-bottom: 8px;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .pick,
+    .method {
+      flex: 1;
+      padding: 8px;
+      border-radius: 10px;
+      background: #1f1f1f;
+      border: 1px solid #2a2a2a;
+      text-align: center;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .pick.active,
+    .method.active {
+      background: #3a3a3a;
+      border-color: #555;
+    }
+
+    #savePredictions {
+      margin-top: 16px;
+      background: #2f2f2f;
+    }
   </style>
 </head>
 
@@ -164,6 +214,7 @@
     <div class="nav-btn" id="myPicksBtn">MY PICKS</div>
   </div>
 
+  <!-- КРИТИЧЕСКИ ВАЖНО ДЛЯ app.js -->
   <div class="nickname" id="nickname"></div>
 </header>
 
